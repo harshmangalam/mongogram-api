@@ -4,14 +4,14 @@ import (
 	"log"
 
 	"mongogram/auth"
-	"mongogram/utils"
+	"mongogram/database"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
 
-	if err := utils.ConnectMongo(); err != nil {
+	if err := database.ConnectMongo(); err != nil {
 		log.Fatal(err)
 	}
 	app := fiber.New()
