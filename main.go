@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"mongogram/auth"
 	"mongogram/database"
+	"mongogram/handlers"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -18,7 +18,7 @@ func main() {
 
 	authRoute := app.Group("/auth")
 
-	authRoute.Post("/signup", auth.Signup)
+	authRoute.Post("/signup", handlers.Signup)
 
 	app.Listen(":4000")
 }

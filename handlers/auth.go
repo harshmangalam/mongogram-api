@@ -1,10 +1,10 @@
-package auth
+package handlers
 
 import (
 	"context"
 	"math"
+	"mongogram/database"
 	"mongogram/models"
-	"mongogram/utils"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -37,7 +37,7 @@ func Signup(c *fiber.Ctx) error {
 		})
 	}
 
-	usersColl := utils.Mi.Db.Collection("users")
+	usersColl := database.Mi.Db.Collection("users")
 	user := new(models.User)
 
 	// verify duplicate email
