@@ -1,9 +1,13 @@
 package auth
 
 import (
+	"context"
+	"mongogram/models"
 	"mongogram/utils"
 
 	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type SignupBody struct {
@@ -22,14 +26,35 @@ func Signup(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "Please provide valid inputs",
 			"data":    signupBody,
+			"error":   err,
 		})
 	}
 
-	users := utils.Mi.Db.Collection("users")
+	usersColl := utils.Mi.Db.Collection("users")
 
 	// verify duplicate email
+	user := new(models.User)
+	if err := usersColl.FindOne(context.TODO(), bson.D{{Key: "email", Value: signupBody.email}}).Decode(user); err != nil {
+		if err != mongo.ErrNoDocuments {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "Error while verifying user email address",
+				"data":    signupBody,
+				"error":   err,
+			})
+		}
+	}
 
 	// verify duplicate phone number
+
+	if err := usersColl.FindOne(context.TODO(), bson.D{{Key: "phone", Value: signupBody.phone}}).Decode(user); err != nil {
+		if err != mongo.ErrNoDocuments {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "Error while verifying user phone number",
+				"data":    signupBody,
+				"error":   err,
+			})
+		}
+	}
 
 	// verify duplicate username
 
