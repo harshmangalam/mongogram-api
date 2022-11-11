@@ -1,10 +1,10 @@
-package handlers
+package handler
 
 import (
 	"context"
 	"math"
 	"mongogram/database"
-	"mongogram/models"
+	models "mongogram/model"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
