@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"mongogram/database"
-	"mongogram/handler"
+	"mongogram/router"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -15,10 +15,7 @@ func main() {
 		log.Fatal(err)
 	}
 	app := fiber.New()
-
-	authRoute := app.Group("/auth")
-
-	authRoute.Post("/signup", handler.Signup)
+	router.SetupRoute(app)
 
 	app.Listen(":4000")
 }
