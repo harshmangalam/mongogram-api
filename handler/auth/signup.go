@@ -4,25 +4,49 @@ import (
 	"context"
 	"math"
 	"mongogram/database"
-	models "mongogram/model"
+	"mongogram/model"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Birthday struct {
-	Day   int `json:"day"`
-	Month int `json:"month"`
-	Year  int `json:"year"`
+	Day   int `json:"day" validate:"required"`
+	Month int `json:"month" validate:"required"`
+	Year  int `json:"year" validate:"required"`
 }
 type SignupBody struct {
-	Email    string    `json:"email"`
-	Phone    string    `json:"phone"`
-	Name     string    `json:"name"`
-	Username string    `json:"username"`
-	Birthday *Birthday `json:"birthday"`
+	Email    string    `json:"email" validate:"required,email"`
+	Phone    string    `json:"phone" validate:"required"`
+	Name     string    `json:"name" validate:"required"`
+	Username string    `json:"username" validate:"required"`
+	Birthday *Birthday `json:"birthday" validate:"required"`
+}
+
+type ErrorResponse struct {
+	FailedField string `json:"failedField"`
+	Tag         string `json:"tag"`
+	Value       string `json:"value"`
+}
+
+var validate = validator.New()
+
+func ValidateStruct(body *SignupBody) []*ErrorResponse {
+	var errors []*ErrorResponse
+	err := validate.Struct(body)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element ErrorResponse
+			element.FailedField = err.StructNamespace()
+			element.Tag = err.Tag()
+			element.Value = err.Param()
+			errors = append(errors, &element)
+		}
+	}
+	return errors
 }
 
 func Signup(c *fiber.Ctx) error {
@@ -35,8 +59,14 @@ func Signup(c *fiber.Ctx) error {
 		})
 	}
 
+	errors := ValidateStruct(signupBody)
+	if errors != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(errors)
+
+	}
+
 	usersColl := database.Mi.Db.Collection("users")
-	user := new(models.User)
+	user := new(model.User)
 
 	// verify duplicate email
 	if err := usersColl.FindOne(context.TODO(), bson.D{{Key: "email", Value: signupBody.Email}}).Decode(user); err != nil {
