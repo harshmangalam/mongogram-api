@@ -57,6 +57,15 @@ func Signup(c *fiber.Ctx) error {
 	}
 
 	// verify duplicate username
+	if err := usersColl.FindOne(context.TODO(), bson.D{{Key: "username", Value: signupBody.username}}).Decode(user); err != nil {
+		if err != mongo.ErrNoDocuments {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"message": "Error while verifying username",
+				"data":    signupBody,
+				"error":   err,
+			})
+		}
+	}
 
 	// verify user age (age>18yr)
 
