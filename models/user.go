@@ -13,6 +13,7 @@ type User struct {
 	Password  string             `bson:"password" json:"password"`
 	Email     string             `bson:"email" json:"email"`
 	Phone     string             `bson:"phone" json:"phone"`
+	Birthday  *time.Time         `bson:"birthday" json:"birthday"`
 	IsActive  bool               `bson:"isActive" json:"isActive"`
 	CreatedAt *time.Time         `bson:"createdAt" json:"createdAt"`
 	UpdatedAt *time.Time         `bson:"updatedAt" json:"updatedAt"`
