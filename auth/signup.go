@@ -129,7 +129,7 @@ func Signup(c *fiber.Ctx) error {
 	// send verification code on email
 
 	return c.JSON(fiber.Map{
-		"message": "Signup",
+		"message": "Account created successfully",
 		"userId":  insertedUser.InsertedID,
 	})
 }
