@@ -51,6 +51,13 @@ func Signup(c *fiber.Ctx) error {
 		}
 	}
 
+	if user.Email != "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Email already exists",
+			"data":    signupBody,
+		})
+	}
+
 	// verify duplicate phone number
 
 	if err := usersColl.FindOne(context.TODO(), bson.D{{Key: "phone", Value: signupBody.Phone}}).Decode(user); err != nil {
@@ -63,6 +70,13 @@ func Signup(c *fiber.Ctx) error {
 		}
 	}
 
+	if user.Phone != "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Phone already exists",
+			"data":    signupBody,
+		})
+	}
+
 	// verify duplicate username
 	if err := usersColl.FindOne(context.TODO(), bson.D{{Key: "username", Value: signupBody.Username}}).Decode(user); err != nil {
 		if err != mongo.ErrNoDocuments {
@@ -72,6 +86,13 @@ func Signup(c *fiber.Ctx) error {
 				"error":   err,
 			})
 		}
+	}
+
+	if user.Username != "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Username already exists",
+			"data":    signupBody,
+		})
 	}
 
 	// verify user age (age>18yr)
@@ -87,6 +108,7 @@ func Signup(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "Your age must be greater than 18",
 			"data":    signupBody,
+			"age":     age,
 		})
 	}
 
