@@ -17,14 +17,22 @@ func Login(c *fiber.Ctx) error {
 
 	if err := c.BodyParser(loginBody); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  "error",
 			"message": err.Error(),
+			"data": fiber.Map{
+				"fields": loginBody,
+			},
 		})
 	}
 
 	// validate users input
 	errors := utils.ValidateStruct(loginBody)
 	if errors != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(errors)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Invalid input",
+			"data":    errors,
+		})
 
 	}
 	// verify user email/username/phone
