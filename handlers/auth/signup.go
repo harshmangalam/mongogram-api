@@ -121,7 +121,16 @@ func Signup(c *fiber.Ctx) error {
 
 	// save data
 
-	doc := bson.D{{Key: "email", Value: signupBody.Email}, {Key: "phone", Value: signupBody.Phone}, {Key: "name", Value: signupBody.Name}, {Key: "username", Value: signupBody.Username}, {Key: "birthday", Value: birthTime}, {Key: "password", Value: hashPassword}}
+	doc := bson.D{
+		{Key: "email", Value: signupBody.Email},
+		{Key: "phone", Value: signupBody.Phone},
+		{Key: "name", Value: signupBody.Name},
+		{Key: "username", Value: signupBody.Username},
+		{Key: "birthday", Value: birthTime},
+		{Key: "password", Value: hashPassword},
+		{Key: "createdAt", Value: time.Now()},
+		{Key: "updatedAt", Value: time.Now()},
+	}
 	insertedUser, err := usersColl.InsertOne(context.TODO(), doc)
 
 	if err != nil {
