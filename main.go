@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"mongogram/database"
-	"mongogram/router"
+	"mongogram/routers"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -15,7 +15,7 @@ func main() {
 		log.Fatal(err)
 	}
 	app := fiber.New()
-	router.SetupRoute(app)
+	routers.SetupRoute(app)
 
 	app.Listen(":4000")
 }

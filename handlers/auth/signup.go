@@ -4,7 +4,7 @@ import (
 	"context"
 	"math"
 	"mongogram/database"
-	"mongogram/model"
+	"mongogram/models"
 	"mongogram/utils"
 	"time"
 
@@ -43,7 +43,7 @@ func Signup(c *fiber.Ctx) error {
 	}
 
 	usersColl := database.Mi.Db.Collection("users")
-	user := new(model.User)
+	user := new(models.User)
 
 	// verify duplicate email
 	if err := usersColl.FindOne(context.TODO(), bson.D{{Key: "email", Value: signupBody.Email}}).Decode(user); err != nil {

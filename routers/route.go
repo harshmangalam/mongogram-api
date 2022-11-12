@@ -1,7 +1,7 @@
-package router
+package routers
 
 import (
-	"mongogram/handler/auth"
+	"mongogram/handlers/auth"
 
 	"github.com/gofiber/fiber/v2"
 )
