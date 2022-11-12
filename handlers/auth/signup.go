@@ -23,6 +23,7 @@ type SignupBody struct {
 	Phone    string    `json:"phone" validate:"required"`
 	Name     string    `json:"name" validate:"required"`
 	Username string    `json:"username" validate:"required"`
+	Password string    `json:"password" validate:"required"`
 	Birthday *Birthday `json:"birthday" validate:"required"`
 }
 
@@ -108,7 +109,7 @@ func Signup(c *fiber.Ctx) error {
 
 	// save data
 
-	doc := bson.D{{Key: "email", Value: signupBody.Email}, {Key: "phone", Value: signupBody.Phone}, {Key: "name", Value: signupBody.Name}, {Key: "username", Value: signupBody.Username}, {Key: "birthday", Value: birthTime}}
+	doc := bson.D{{Key: "email", Value: signupBody.Email}, {Key: "phone", Value: signupBody.Phone}, {Key: "name", Value: signupBody.Name}, {Key: "username", Value: signupBody.Username}, {Key: "birthday", Value: birthTime}, {Key: "password", Value: signupBody.Password}}
 	insertedUser, err := usersColl.InsertOne(context.TODO(), doc)
 
 	if err != nil {
