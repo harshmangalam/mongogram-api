@@ -5,8 +5,10 @@ import (
 	"mongogram/database"
 	"mongogram/models"
 	"mongogram/utils"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -104,11 +106,23 @@ func Login(c *fiber.Ctx) error {
 	}
 	// create jwt token
 
+	token := jwt.New(jwt.SigningMethodHS256)
+
+	claims := token.Claims.(jwt.MapClaims)
+	claims["userId"] = user.Id
+	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+
+	t, err := token.SignedString([]byte("SECRET"))
+	if err != nil {
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"status":  "success",
 		"message": "You have Logged in successfully",
 		"data": fiber.Map{
-			"user": user,
+			"user":       user,
+			"accesToken": t,
 		},
 	})
 }
