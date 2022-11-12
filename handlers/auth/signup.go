@@ -52,7 +52,7 @@ func Signup(c *fiber.Ctx) error {
 
 	}
 
-	usersColl := database.Mi.Db.Collection("users")
+	usersColl := database.Mi.Db.Collection(database.UsersCollection)
 	user := new(models.User)
 
 	// verify duplicate email
