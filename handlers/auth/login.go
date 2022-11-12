@@ -24,9 +24,7 @@ func Login(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  "error",
 			"message": err.Error(),
-			"data": fiber.Map{
-				"fields": loginBody,
-			},
+			"data":    nil,
 		})
 	}
 
@@ -36,7 +34,9 @@ func Login(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status":  "error",
 			"message": "Invalid input",
-			"data":    errors,
+			"data": fiber.Map{
+				"errors": errors,
+			},
 		})
 
 	}
@@ -46,32 +46,69 @@ func Login(c *fiber.Ctx) error {
 
 	// verify user email/username/phone
 
-	if err := usersColl.FindOne(context.TODO(), bson.D{{Key: "email", Value: loginBody.Username}, {Key: "username", Value: loginBody.Username}, {Key: "phone", Value: loginBody.Username}}).Decode(user); err != nil {
+	filter := bson.D{
+		{Key: "$or", Value: bson.A{
+			bson.D{{Key: "email", Value: loginBody.Username}},
+			bson.D{{Key: "phone", Value: loginBody.Username}},
+			bson.D{{Key: "username", Value: loginBody.Username}},
+		},
+		},
+	}
+	if err := usersColl.FindOne(context.TODO(), filter).Decode(user); err != nil {
 		if err == mongo.ErrNoDocuments {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"status":  "error",
-				"message": "Invalid credentials",
-				"data":    errors,
+				"message": "Incorrect credentials",
+				"data":    nil,
 			})
 		} else {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"status":  "error",
 				"message": err.Error(),
-				"data": fiber.Map{
-					"fields": loginBody,
-				},
+				"data":    nil,
 			})
 		}
 	}
-	// match user password
+	// match  password hash
+
+	if match := utils.CheckPasswordHash(loginBody.Password, user.Password); !match {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Incorrect credentials",
+			"data":    nil,
+		})
+	}
 
 	// update user active status
 
+	filterUser := bson.D{{Key: "_id", Value: user.Id}}
+	updateUser := bson.D{{Key: "$set", Value: bson.D{{Key: "isActive", Value: true}}}}
+	_, err := usersColl.UpdateOne(context.TODO(), filterUser, updateUser)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  "error",
+			"message": err.Error(),
+			"data":    nil,
+		})
+
+	}
+
+	// fetch updated user
+
+	if err := usersColl.FindOne(context.TODO(), filter).Decode(user); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  "error",
+			"message": err.Error(),
+			"data":    nil,
+		})
+	}
 	// create jwt token
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"status":  "success",
 		"message": "You have Logged in successfully",
-		"data":    fiber.Map{},
+		"data": fiber.Map{
+			"user": user,
+		},
 	})
 }
