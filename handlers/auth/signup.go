@@ -33,13 +33,22 @@ func Signup(c *fiber.Ctx) error {
 
 	if err := c.BodyParser(signupBody); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"type":    "error",
 			"message": err.Error(),
+			"data":    nil,
 		})
 	}
 
+	// validate user input
 	errors := utils.ValidateStruct(signupBody)
 	if errors != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(errors)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Invalid input",
+			"data": fiber.Map{
+				"errors": errors,
+			},
+		})
 
 	}
 
@@ -50,13 +59,17 @@ func Signup(c *fiber.Ctx) error {
 	if err := usersColl.FindOne(context.TODO(), bson.D{{Key: "email", Value: signupBody.Email}}).Decode(user); err != nil {
 		if err != mongo.ErrNoDocuments {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"status":  "error",
 				"message": err.Error(),
+				"data":    nil,
 			})
 		}
 	}
 
 	if user.Email != "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  "error",
+			"data":    nil,
 			"message": "Email already exists",
 		})
 	}
@@ -66,7 +79,9 @@ func Signup(c *fiber.Ctx) error {
 	if err := usersColl.FindOne(context.TODO(), bson.D{{Key: "phone", Value: signupBody.Phone}}).Decode(user); err != nil {
 		if err != mongo.ErrNoDocuments {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"status":  "error",
 				"message": err.Error(),
+				"data":    nil,
 			})
 		}
 	}
@@ -74,6 +89,8 @@ func Signup(c *fiber.Ctx) error {
 	if user.Phone != "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "Phone number already exists",
+			"status":  "error",
+			"data":    nil,
 		})
 	}
 
@@ -82,6 +99,8 @@ func Signup(c *fiber.Ctx) error {
 		if err != mongo.ErrNoDocuments {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"message": err.Error(),
+				"status":  "error",
+				"data":    nil,
 			})
 		}
 	}
@@ -89,6 +108,8 @@ func Signup(c *fiber.Ctx) error {
 	if user.Username != "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "Username already exists",
+			"status":  "error",
+			"data":    nil,
 		})
 	}
 
@@ -104,6 +125,8 @@ func Signup(c *fiber.Ctx) error {
 	if age <= 18 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "Your age must be greater than 18",
+			"status":  "error",
+			"data":    nil,
 		})
 	}
 
@@ -136,6 +159,8 @@ func Signup(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": err.Error(),
+			"status":  "error",
+			"data":    nil,
 		})
 	}
 	// send Verification code on mobile phone
