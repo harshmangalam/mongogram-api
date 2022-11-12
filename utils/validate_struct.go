@@ -8,7 +8,7 @@ type ErrorResponse struct {
 	Value       string `json:"value"`
 }
 
-func ValidateStruct(body *any) []*ErrorResponse {
+func ValidateStruct(body any) []*ErrorResponse {
 	var validate = validator.New()
 	var errors []*ErrorResponse
 	err := validate.Struct(body)
