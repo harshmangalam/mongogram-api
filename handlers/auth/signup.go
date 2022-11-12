@@ -169,6 +169,9 @@ func Signup(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"message": "Account created successfully",
-		"userId":  insertedUser.InsertedID,
+		"status":  "success",
+		"data": fiber.Map{
+			"userId": insertedUser.InsertedID,
+		},
 	})
 }
