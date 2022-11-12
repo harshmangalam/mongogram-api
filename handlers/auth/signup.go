@@ -107,9 +107,21 @@ func Signup(c *fiber.Ctx) error {
 		})
 	}
 
+	// hash plain password
+
+	hashPassword, err := utils.HashPassword(signupBody.Password)
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  "error",
+			"message": err.Error(),
+			"data":    nil,
+		})
+	}
+
 	// save data
 
-	doc := bson.D{{Key: "email", Value: signupBody.Email}, {Key: "phone", Value: signupBody.Phone}, {Key: "name", Value: signupBody.Name}, {Key: "username", Value: signupBody.Username}, {Key: "birthday", Value: birthTime}, {Key: "password", Value: signupBody.Password}}
+	doc := bson.D{{Key: "email", Value: signupBody.Email}, {Key: "phone", Value: signupBody.Phone}, {Key: "name", Value: signupBody.Name}, {Key: "username", Value: signupBody.Username}, {Key: "birthday", Value: birthTime}, {Key: "password", Value: hashPassword}}
 	insertedUser, err := usersColl.InsertOne(context.TODO(), doc)
 
 	if err != nil {
