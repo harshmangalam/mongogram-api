@@ -5,9 +5,9 @@ import (
 	"math"
 	"mongogram/database"
 	"mongogram/model"
+	"mongogram/utils"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -26,29 +26,6 @@ type SignupBody struct {
 	Birthday *Birthday `json:"birthday" validate:"required"`
 }
 
-type ErrorResponse struct {
-	FailedField string `json:"failedField"`
-	Tag         string `json:"tag"`
-	Value       string `json:"value"`
-}
-
-var validate = validator.New()
-
-func ValidateStruct(body *SignupBody) []*ErrorResponse {
-	var errors []*ErrorResponse
-	err := validate.Struct(body)
-	if err != nil {
-		for _, err := range err.(validator.ValidationErrors) {
-			var element ErrorResponse
-			element.FailedField = err.StructNamespace()
-			element.Tag = err.Tag()
-			element.Value = err.Param()
-			errors = append(errors, &element)
-		}
-	}
-	return errors
-}
-
 func Signup(c *fiber.Ctx) error {
 
 	signupBody := new(SignupBody)
@@ -59,7 +36,7 @@ func Signup(c *fiber.Ctx) error {
 		})
 	}
 
-	errors := ValidateStruct(signupBody)
+	errors := utils.ValidateStruct(signupBody)
 	if errors != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(errors)
 
