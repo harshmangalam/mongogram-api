@@ -4,6 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	jwtware "github.com/gofiber/jwt/v2"
 	"github.com/golang-jwt/jwt/v4"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // Protected protect routes
@@ -27,7 +28,9 @@ func jwtError(c *fiber.Ctx, err error) error {
 func success(c *fiber.Ctx) error {
 	token := c.Locals("jwtToken").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
-	userId := claims["userId"]
+	strId := claims["userId"].(string)
+	userId, _ := primitive.ObjectIDFromHex(strId)
+
 	c.Locals("userId", userId)
 	return c.Next()
 }
