@@ -21,4 +21,5 @@ func SetupRoute(app *fiber.App) {
 	userRoute := app.Group("/user")
 	userRoute.Get("/me", middlewares.Protected(), user.GetMe)
 	userRoute.Get("/:userId", user.GetUser)
+	userRoute.Post("/:userId/friendship", middlewares.Protected(), user.Friendship)
 }
