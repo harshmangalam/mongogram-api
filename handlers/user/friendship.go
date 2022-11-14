@@ -13,6 +13,7 @@ import (
 
 func Friendship(c *fiber.Ctx) error {
 	currentUserId := c.Locals("userId")
+
 	// first check the user to whome you want to follow exists in db
 	otherUserId, err := primitive.ObjectIDFromHex(c.Params("userId"))
 	if err != nil {
@@ -45,18 +46,28 @@ func Friendship(c *fiber.Ctx) error {
 
 	// check if you already follow other user
 
+	// id1, _ := primitive.ObjectIDFromHex("636f6471d27c021c073fa498")
+	// id2, _ := primitive.ObjectIDFromHex("636f719e140eb7905d3bc7d6")
 	user := new(models.User)
 	followerFilter := bson.M{
-		"followers": bson.M{
-			"$in": bson.A{
-				currentUserId,
-			},
+		"_id": otherUserId,
+		"followers": bson.A{
+			currentUserId,
 		},
 	}
 	if err := usersColl.FindOne(context.TODO(), followerFilter).Decode(user); err != nil {
 		if err == mongo.ErrNoDocuments {
 
 			// you are not following other user
+
+			// do not follow yourself
+			if currentUserId == otherUserId {
+				return c.Status(fiber.StatusOK).JSON(fiber.Map{
+					"status":  "error",
+					"message": "You are not allowed to follow yourself",
+					"data":    nil,
+				})
+			}
 			// follow other user
 
 			updateQuery := bson.M{
@@ -89,12 +100,12 @@ func Friendship(c *fiber.Ctx) error {
 		}
 	}
 
-	// you are not following other user
-	// follow other user
+	// you already follow
+	// unfollow other user
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"status":  "success",
 		"message": "Unfollow",
-		"data":    nil,
+		"data":    user,
 	})
 }
