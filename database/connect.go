@@ -3,13 +3,14 @@ package database
 import (
 	"context"
 	"log"
+	"mongogram/config"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const dbName = "mongogram"
-const mongoURI = "mongodb://localhost:27017/" + dbName
+var dbName = config.Config("MONGODB_NAME")
+var mongoURI = config.Config("MONGODB_URI")
 
 func ConnectMongo() error {
 	clientOptions := options.Client().ApplyURI(mongoURI)
