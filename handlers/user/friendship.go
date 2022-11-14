@@ -77,7 +77,7 @@ func Friendship(c *fiber.Ctx) error {
 					},
 				},
 			}
-			updatedResult, err := usersColl.UpdateByID(context.TODO(), otherUserId, updateQuery)
+			_, err = usersColl.UpdateByID(context.TODO(), otherUserId, updateQuery)
 			if err != nil {
 				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 					"status":  "error",
@@ -88,7 +88,7 @@ func Friendship(c *fiber.Ctx) error {
 			return c.Status(fiber.StatusOK).JSON(fiber.Map{
 				"status":  "success",
 				"message": "Follow",
-				"data":    updatedResult,
+				"data":    nil,
 			})
 
 		} else {
@@ -103,9 +103,25 @@ func Friendship(c *fiber.Ctx) error {
 	// you already follow
 	// unfollow other user
 
+	updateQuery := bson.M{
+		"$pull": bson.M{
+			"followers": bson.A{
+				currentUserId,
+			},
+		},
+	}
+	_, err = usersColl.UpdateByID(context.TODO(), otherUserId, updateQuery)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  "error",
+			"message": err.Error(),
+			"data":    nil,
+		})
+	}
+
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"status":  "success",
 		"message": "Unfollow",
-		"data":    user,
+		"data":    nil,
 	})
 }
