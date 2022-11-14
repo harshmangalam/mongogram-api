@@ -11,6 +11,7 @@ require (
 	github.com/gofiber/jwt/v2 v2.2.7 // indirect
 	github.com/golang-jwt/jwt/v4 v4.4.2 // indirect
 	github.com/golang/snappy v0.0.3 // indirect
+	github.com/joho/godotenv v1.4.0 // indirect
 	github.com/klauspost/compress v1.15.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
