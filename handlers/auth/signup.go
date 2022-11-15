@@ -151,8 +151,8 @@ func Signup(c *fiber.Ctx) error {
 		{Key: "username", Value: signupBody.Username},
 		{Key: "birthday", Value: birthTime},
 		{Key: "password", Value: hashPassword},
-		{Key: "createdAt", Value: time.Now()},
-		{Key: "updatedAt", Value: time.Now()},
+		{Key: "createdAt", Value: time.Now().UTC()},
+		{Key: "updatedAt", Value: time.Now().UTC()},
 	}
 	insertedUser, err := usersColl.InsertOne(context.TODO(), doc)
 
