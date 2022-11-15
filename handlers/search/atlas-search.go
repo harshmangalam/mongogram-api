@@ -4,6 +4,7 @@ import (
 	"context"
 	"mongogram/database"
 	"mongogram/models"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
@@ -12,9 +13,28 @@ import (
 
 func AtlasSearch(c *fiber.Ctx) error {
 	queryText := c.Query("q")
+	userId := c.Locals("userId")
 
 	usersColl := database.Mi.Db.Collection(database.UsersCollection)
+	searchColl := database.Mi.Db.Collection(database.SearchCollection)
 
+	// save text as a recent search
+
+	searchDoc := bson.D{
+		{Key: "text", Value: queryText},
+		{Key: "userId", Value: userId},
+		{Key: "searchedAt", Value: time.Now().UTC()},
+	}
+	_, err := searchColl.InsertOne(context.TODO(), searchDoc)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  "error",
+			"message": err.Error(),
+			"data":    nil,
+		})
+	}
+
+	// create atlas search pipeline
 	pipeline := mongo.Pipeline{
 		bson.D{
 			{"$search", bson.D{
