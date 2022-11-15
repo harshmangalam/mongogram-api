@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func GetRecentSearche(c *fiber.Ctx) error {
+func GetRecentSearch(c *fiber.Ctx) error {
 	userId := c.Locals("userId")
 
 	searchColl := database.Mi.Db.Collection(database.SearchCollection)
