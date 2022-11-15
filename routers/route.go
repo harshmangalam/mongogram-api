@@ -26,5 +26,6 @@ func SetupRoute(app *fiber.App) {
 	searchRoute := app.Group("/search")
 	searchRoute.Get("/", middlewares.Protected(), search.AtlasSearch)
 	searchRoute.Get("/recent", middlewares.Protected(), search.GetRecentSearch)
+	searchRoute.Delete("/:searchId", middlewares.Protected(), search.DeleteRecentSearch)
 
 }
