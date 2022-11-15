@@ -24,6 +24,6 @@ func SetupRoute(app *fiber.App) {
 
 	// search route
 	searchRoute := app.Group("/search")
-	searchRoute.Get("/", search.AtlasSearch)
+	searchRoute.Get("/", middlewares.Protected(), search.AtlasSearch)
 
 }
