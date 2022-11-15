@@ -37,7 +37,7 @@ func GetRecentSearch(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"status":  "success",
-		"message": "fetch search results",
+		"message": "fetch recent searches",
 		"data": fiber.Map{
 			"searches": searches,
 		},
