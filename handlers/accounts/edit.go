@@ -1,6 +1,14 @@
 package accounts
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"context"
+	"mongogram/database"
+	"mongogram/models"
+	"mongogram/utils"
+
+	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/bson"
+)
 
 type EditAccountBody struct {
 	Email    string `json:"email" validate:"required,email"`
@@ -11,6 +19,7 @@ type EditAccountBody struct {
 }
 
 func EditAccount(c *fiber.Ctx) error {
+	userId := c.Locals("userId")
 	editAccBody := new(EditAccountBody)
 
 	// parse request body
@@ -24,9 +33,41 @@ func EditAccount(c *fiber.Ctx) error {
 
 	// validate input body
 
-	// verify user authorization
+	errors := utils.ValidateStruct(editAccBody)
+	if errors != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Invalid input",
+			"data": fiber.Map{
+				"errors": errors,
+			},
+		})
+
+	}
+
+	usersColl := database.Mi.Db.Collection(database.UsersCollection)
 
 	// update account
+
+	updateDoc := bson.D{
+		{"$set", bson.D{
+			{"email", editAccBody.Email},
+			{"name", editAccBody.Name},
+			{"phone", editAccBody.Phone},
+			{"username", editAccBody.Username},
+			{"bio", editAccBody.Bio},
+		},
+		},
+	}
+	user := new(models.User)
+	if err := usersColl.FindOneAndUpdate(context.TODO(), bson.D{{"_id", userId}}, updateDoc).Decode(user); err != nil {
+
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  "error",
+			"message": err.Error(),
+			"data":    nil,
+		})
+	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"status":  "success",
