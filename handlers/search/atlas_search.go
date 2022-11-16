@@ -4,6 +4,7 @@ import (
 	"context"
 	"mongogram/database"
 	"mongogram/models"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -14,6 +15,14 @@ import (
 func AtlasSearch(c *fiber.Ctx) error {
 	queryText := c.Query("q")
 	userId := c.Locals("userId")
+
+	if strings.Trim(queryText, " ") == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Search query must be required",
+			"data":    nil,
+		})
+	}
 
 	usersColl := database.Mi.Db.Collection(database.UsersCollection)
 	searchColl := database.Mi.Db.Collection(database.SearchCollection)
