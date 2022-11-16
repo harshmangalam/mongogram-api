@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"mongogram/handlers/accounts"
 	"mongogram/handlers/auth"
 	"mongogram/handlers/search"
 	"mongogram/handlers/user"
@@ -28,5 +29,10 @@ func SetupRoute(app *fiber.App) {
 	searchRoute.Get("/recent", middlewares.Protected(), search.GetRecentSearch)
 	searchRoute.Delete("/recent", middlewares.Protected(), search.DeleteRecentSearchs)
 	searchRoute.Delete("/recent/:searchId", middlewares.Protected(), search.DeleteRecentSearch)
+
+	// account route
+
+	accountRoute := app.Group("/account")
+	accountRoute.Put("/edit", middlewares.Protected(), accounts.EditAccount)
 
 }
