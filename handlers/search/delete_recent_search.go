@@ -74,3 +74,29 @@ func DeleteRecentSearch(c *fiber.Ctx) error {
 		"data":    nil,
 	})
 }
+
+func DeleteRecentSearchs(c *fiber.Ctx) error {
+	userId := c.Locals("userId")
+
+	searchColl := database.Mi.Db.Collection(database.SearchCollection)
+	filter := bson.D{
+		{"userId", userId},
+	}
+	// only authorized user can delete search
+
+	_, err := searchColl.DeleteMany(context.TODO(), filter)
+	if err != nil {
+
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  "error",
+			"message": err.Error(),
+			"data":    nil,
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"status":  "success",
+		"message": "Deleted",
+		"data":    nil,
+	})
+}
