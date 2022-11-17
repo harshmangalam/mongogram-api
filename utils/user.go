@@ -6,11 +6,10 @@ import (
 	"mongogram/models"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func DuplicateField(coll *mongo.Collection, field string, value any) (bool, error) {
+func DuplicateUserField(coll *mongo.Collection, field string, value any) (bool, error) {
 	data := bson.D{}
 	if err := coll.FindOne(context.TODO(), bson.D{{Key: field, Value: value}}).Decode(data); err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -22,7 +21,7 @@ func DuplicateField(coll *mongo.Collection, field string, value any) (bool, erro
 	return true, nil
 }
 
-func FindUserById(userId *primitive.ObjectID) (*models.User, error) {
+func FindUserById(userId any) (*models.User, error) {
 	user := new(models.User)
 
 	usersColl := database.Mi.Db.Collection(database.UsersCollection)
