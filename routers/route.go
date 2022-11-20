@@ -16,6 +16,7 @@ func SetupRoute(app *fiber.App) {
 	authRoute := app.Group("/auth")
 	authRoute.Post("/signup", auth.Signup)
 	authRoute.Post("/login", auth.Login)
+	authRoute.Post("/login-with-github", auth.LoginWithGithub)
 
 	// user route
 	userRoute := app.Group("/user")
