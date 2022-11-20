@@ -23,23 +23,13 @@ func Login(c *fiber.Ctx) error {
 	loginBody := new(LoginBody)
 
 	if err := c.BodyParser(loginBody); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"status":  "error",
-			"message": err.Error(),
-			"data":    nil,
-		})
+		return utils.ReturnError(c, fiber.StatusInternalServerError, err.Error(), nil)
 	}
 
 	// validate users input
 	errors := utils.ValidateStruct(loginBody)
 	if errors != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"status":  "error",
-			"message": "Invalid input",
-			"data": fiber.Map{
-				"errors": errors,
-			},
-		})
+		return utils.ReturnError(c, fiber.StatusBadRequest, "Invalid input", errors)
 
 	}
 
@@ -58,27 +48,17 @@ func Login(c *fiber.Ctx) error {
 	}
 	if err := usersColl.FindOne(context.TODO(), filter).Decode(user); err != nil {
 		if err == mongo.ErrNoDocuments {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"status":  "error",
-				"message": "Incorrect credentials",
-				"data":    nil,
-			})
+			return utils.ReturnError(c, fiber.StatusBadRequest, "Incorrect credentials", nil)
 		} else {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"status":  "error",
-				"message": err.Error(),
-				"data":    nil,
-			})
+			return utils.ReturnError(c, fiber.StatusInternalServerError, err.Error(), nil)
 		}
 	}
+
 	// match  password hash
 
 	if match := utils.CheckPasswordHash(loginBody.Password, user.Password); !match {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"status":  "error",
-			"message": "Incorrect credentials",
-			"data":    nil,
-		})
+		return utils.ReturnError(c, fiber.StatusBadRequest, "Incorrect credentials", nil)
+
 	}
 
 	// update user active status
@@ -87,22 +67,15 @@ func Login(c *fiber.Ctx) error {
 	updateUser := bson.D{{Key: "$set", Value: bson.D{{Key: "isActive", Value: true}}}}
 	_, err := usersColl.UpdateOne(context.TODO(), filterUser, updateUser)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"status":  "error",
-			"message": err.Error(),
-			"data":    nil,
-		})
+		return utils.ReturnError(c, fiber.StatusInternalServerError, err.Error(), nil)
 
 	}
 
 	// fetch updated user
 
 	if err := usersColl.FindOne(context.TODO(), filter).Decode(user); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"status":  "error",
-			"message": err.Error(),
-			"data":    nil,
-		})
+		return utils.ReturnError(c, fiber.StatusInternalServerError, err.Error(), nil)
+
 	}
 	// create jwt token
 
@@ -117,12 +90,10 @@ func Login(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"status":  "success",
-		"message": "You have Logged in successfully",
-		"data": fiber.Map{
-			"user":       user,
-			"accesToken": t,
-		},
-	})
+	data := fiber.Map{
+		"user":       user,
+		"accesToken": t,
+	}
+	return utils.ReturnSuccess(c, fiber.StatusOK, "Login successfully", data)
+
 }
