@@ -36,3 +36,21 @@ func FindUserById(userId any) (*models.User, error) {
 
 	return user, nil
 }
+
+func FindUser(field string, value string) (*models.User, error) {
+	user := new(models.User)
+
+	usersColl := database.Mi.Db.Collection(database.UsersCollection)
+
+	filter := bson.M{}
+	filter[field] = value
+	if err := usersColl.FindOne(context.TODO(), filter).Decode(user); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, nil
+		} else {
+			return nil, err
+		}
+	}
+
+	return user, nil
+}
