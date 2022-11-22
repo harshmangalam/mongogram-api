@@ -36,6 +36,6 @@ func SetupRoute(app *fiber.App) {
 	accountRoute := app.Group("/account")
 	accountRoute.Put("/edit", middlewares.Protected(), accounts.EditAccount)
 	accountRoute.Patch("/change_password", middlewares.Protected(), accounts.ChangePassword)
-	accountRoute.Patch("/reset_password", accounts.ResetPassword)
+	accountRoute.Post("/reset_password", accounts.ResetPassword)
 
 }

@@ -1,6 +1,7 @@
 package accounts
 
 import (
+	"fmt"
 	"mongogram/config"
 	"mongogram/utils"
 
@@ -40,6 +41,7 @@ func ResetPassword(c *fiber.Ctx) error {
 	if err != nil {
 		return utils.ReturnError(c, fiber.StatusInternalServerError, err.Error(), nil)
 	}
+	fmt.Println(pin)
 	message := []byte("To: " + body.Email + "\r\n" +
 		"Subject: Reset your password!\r\n" +
 		"\r\n" + "Your 6 digit pin code is " + pin +
