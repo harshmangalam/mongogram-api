@@ -52,3 +52,15 @@ func FindUser(field string, value string) (*models.User, error) {
 
 	return user, nil
 }
+
+func UpdateUser(id any, update bson.M) (bool, error) {
+
+	usersColl := database.Mi.Db.Collection(database.UsersCollection)
+
+	_, err := usersColl.UpdateByID(context.TODO(), id, update)
+
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
