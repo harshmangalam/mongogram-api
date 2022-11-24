@@ -1,9 +1,13 @@
 package post
 
 import (
+	"context"
+	"mongogram/database"
 	"mongogram/utils"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type CreatePostBody struct {
@@ -28,4 +32,24 @@ func CreatePost(c *fiber.Ctx) error {
 
 	}
 
+	postsColl := database.Mi.Db.Collection(database.PostsCollection)
+
+	doc := bson.M{
+		"mediaType": body.MediaType,
+		"mediaUrl":  body.MediaUrl,
+		"content":   body.Content,
+		"authorId":  userId,
+		"createdAt": time.Now().UTC(),
+		"updatedAt": time.Now().UTC(),
+	}
+	_, err := postsColl.InsertOne(context.TODO(), doc)
+	if err != nil {
+		return utils.ReturnError(c, fiber.StatusInternalServerError, err.Error(), nil)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"status":  "success",
+		"message": "Post created",
+		"data":    nil,
+	})
 }
