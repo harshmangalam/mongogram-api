@@ -1,11 +1,11 @@
 package accounts
 
 import (
-	"fmt"
 	"mongogram/config"
 	"mongogram/utils"
 
 	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type ResetPasswordBody struct {
@@ -41,7 +41,12 @@ func ResetPassword(c *fiber.Ctx) error {
 	if err != nil {
 		return utils.ReturnError(c, fiber.StatusInternalServerError, err.Error(), nil)
 	}
-	fmt.Println(pin)
+
+	_, err = utils.UpdateUser(user.Id, bson.M{"resetPassOtp": pin})
+
+	if err != nil {
+		return utils.ReturnError(c, fiber.StatusInternalServerError, err.Error(), nil)
+	}
 	message := []byte("To: " + body.Email + "\r\n" +
 		"Subject: Reset your password!\r\n" +
 		"\r\n" + "Your 6 digit pin code is " + pin +
