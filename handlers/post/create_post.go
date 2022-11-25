@@ -11,8 +11,8 @@ import (
 )
 
 type CreatePostBody struct {
-	MediaType string `json:"mediaType" validate:"require"`
-	MediaUrl  string `json:"mediaUrl" validate:"require"`
+	MediaType string `json:"mediaType" validate:"required"`
+	MediaUrl  string `json:"mediaUrl" validate:"required"`
 	Content   string `json:"content"`
 }
 

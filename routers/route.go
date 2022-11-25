@@ -41,6 +41,7 @@ func SetupRoute(app *fiber.App) {
 	accountRoute.Post("/reset_password", accounts.ResetPassword)
 
 	//posts
-	accountRoute.Patch("/posts", middlewares.Protected(), post.CreatePost)
+	postRoute := app.Group("/posts")
+	postRoute.Post("/", middlewares.Protected(), post.CreatePost)
 
 }
