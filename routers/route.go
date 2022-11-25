@@ -3,8 +3,10 @@ package routers
 import (
 	"mongogram/handlers/accounts"
 	"mongogram/handlers/auth"
+	"mongogram/handlers/post"
 	"mongogram/handlers/search"
 	"mongogram/handlers/user"
+
 	"mongogram/middlewares"
 
 	"github.com/gofiber/fiber/v2"
@@ -37,5 +39,8 @@ func SetupRoute(app *fiber.App) {
 	accountRoute.Put("/edit", middlewares.Protected(), accounts.EditAccount)
 	accountRoute.Patch("/change_password", middlewares.Protected(), accounts.ChangePassword)
 	accountRoute.Post("/reset_password", accounts.ResetPassword)
+
+	//posts
+	accountRoute.Patch("/posts", middlewares.Protected(), post.CreatePost)
 
 }
