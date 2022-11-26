@@ -43,5 +43,6 @@ func SetupRoute(app *fiber.App) {
 	//posts
 	postRoute := app.Group("/posts")
 	postRoute.Post("/", middlewares.Protected(), post.CreatePost)
+	postRoute.Get("/", post.GetPosts)
 
 }
