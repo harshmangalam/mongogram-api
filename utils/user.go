@@ -73,10 +73,10 @@ func UpdateUser(id any, update bson.M) (bool, error) {
 	return true, nil
 }
 
-func GetAge(birthday *Birthday) float64 {
+func GetAge(birthday *Birthday) (float64, *time.Time) {
 	birthTime := time.Date(birthday.Year, time.Month(birthday.Month), birthday.Day, 0, 0, 0, 0, time.UTC)
 	// calculate user age
 	const SecondsInYear = 3.156e+7
-	return math.Round(time.Since(birthTime).Seconds() / SecondsInYear)
+	return math.Round(time.Since(birthTime).Seconds() / SecondsInYear), &birthTime
 
 }
