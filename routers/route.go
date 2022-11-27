@@ -35,7 +35,6 @@ func SetupRoute(app *fiber.App) {
 	searchRoute.Delete("/recent/:searchId", middlewares.Protected(), search.DeleteRecentSearch)
 
 	// account route
-
 	accountRoute := app.Group("/account")
 	accountRoute.Put("/edit", middlewares.Protected(), accounts.EditAccount)
 	accountRoute.Patch("/change_password", middlewares.Protected(), accounts.ChangePassword)
@@ -48,8 +47,8 @@ func SetupRoute(app *fiber.App) {
 	postRoute.Get("/:postId", post.GetPost)
 
 	// media
-
 	mediaRoute := app.Group("/media")
-	mediaRoute.Post("/upload", media.Upload)
+	mediaRoute.Post("/upload", middlewares.Protected(), media.Upload)
+	mediaRoute.Get("/", media.GetMedia)
 
 }
