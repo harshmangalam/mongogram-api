@@ -21,6 +21,11 @@ func NewResponseSchema() *ResponseSchema {
 	return &ResponseSchema{}
 }
 
+func (r *ResponseSchema) SetCtx(ctx *fiber.Ctx) *ResponseSchema {
+	r.Ctx = ctx
+	return r
+}
+
 func (r *ResponseSchema) SetStatusText(statusText StatusText) *ResponseSchema {
 	r.StatusText = statusText
 	return r
@@ -48,7 +53,8 @@ func (r *ResponseSchema) Return() error {
 }
 
 func CustomResponse(r *ResponseSchema) error {
-	return NewResponseSchema()
+	return NewResponseSchema().Set
+
 }
 
 func InternalServerErrorResponse(c *fiber.Ctx, err error) {
