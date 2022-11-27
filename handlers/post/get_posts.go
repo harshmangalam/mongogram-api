@@ -18,18 +18,14 @@ func GetPosts(c *fiber.Ctx) error {
 	cursor, err := postsColl.Find(context.TODO(), bson.M{})
 
 	if err != nil {
-		return utils.ReturnError(c, fiber.StatusInternalServerError, err.Error(), nil)
+		return utils.InternalServerErrorResponse(c, err)
 	}
 
 	if err := cursor.All(context.TODO(), &posts); err != nil {
-		return utils.ReturnError(c, fiber.StatusInternalServerError, err.Error(), nil)
+		return utils.InternalServerErrorResponse(c, err)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"status":  "success",
-		"message": "get posts",
-		"data": fiber.Map{
-			"posts": posts,
-		},
+	return utils.OkResponse(c, "Get post lists", fiber.Map{
+		"posts": posts,
 	})
 }
