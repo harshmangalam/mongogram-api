@@ -77,6 +77,10 @@ func BadRequestErrorResponse(c *fiber.Ctx, err error, data fiber.Map) error {
 	return CustomResponse(c, fiber.StatusBadRequest, StatusError, err.Error(), data)
 }
 
+func NotFoundErrorResponse(c *fiber.Ctx) error {
+	return CustomResponse(c, fiber.StatusNotFound, StatusError, "Not found", nil)
+}
+
 func OkResponse(c *fiber.Ctx, message string, data fiber.Map) error {
 	return CustomResponse(c, fiber.StatusOK, StatusSuccess, message, data)
 }
