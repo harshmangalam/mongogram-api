@@ -18,7 +18,7 @@ func Upload(c *fiber.Ctx) error {
 	// parse request multipart form data and extract media
 	file, err := c.FormFile("media")
 	if err != nil {
-		return utils.ReturnError(c, fiber.StatusInternalServerError, err.Error(), nil)
+		return utils.InternalServerErrorResponse(c, err)
 	}
 
 	bucket := database.Mi.Bucket
@@ -27,15 +27,15 @@ func Upload(c *fiber.Ctx) error {
 	// get file chunks
 	fileData, err := file.Open()
 	if err != nil {
-		return utils.ReturnError(c, fiber.StatusInternalServerError, err.Error(), nil)
+		return utils.InternalServerErrorResponse(c, err)
 	}
 	// add meta data in gridfs files collection
 	uploadOptions := options.GridFSUpload().SetMetadata(bson.M{"userId": userId})
 	// upload data in gridfs  chunks collection
 	bucketId, err := bucket.UploadFromStream(filename, io.Reader(fileData), uploadOptions)
 	if err != nil {
-		return utils.ReturnError(c, fiber.StatusInternalServerError, err.Error(), nil)
+		return utils.InternalServerErrorResponse(c, err)
 	}
-	return utils.ReturnSuccess(c, fiber.StatusOK, "Uploaded", fiber.Map{"bucketId": bucketId})
+	return utils.CreatedResponse(c, "Uploaded", fiber.Map{"bucketId": bucketId})
 
 }
