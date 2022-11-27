@@ -22,14 +22,14 @@ func CreatePost(c *fiber.Ctx) error {
 
 	// parse request body
 	if err := c.BodyParser(body); err != nil {
-		return utils.ReturnError(c, fiber.StatusInternalServerError, err.Error(), nil)
+		return utils.InternalServerErrorResponse(c, err)
 	}
 
 	// validate input body
 
 	errors := utils.ValidateStruct(body)
 	if errors != nil {
-		return utils.ReturnError(c, fiber.StatusBadRequest, "Invalid input", errors)
+		return utils.UnprocessedInputResponse(c, fiber.Map{"errors": errors})
 
 	}
 
@@ -37,7 +37,7 @@ func CreatePost(c *fiber.Ctx) error {
 
 	mediaId, err := primitive.ObjectIDFromHex(body.MediaId)
 	if err != nil {
-		return utils.ReturnError(c, fiber.StatusBadRequest, "Invalid media id", nil)
+		return utils.BadRequestErrorResponse(c, "Invalid media id")
 	}
 
 	doc := bson.M{
@@ -49,10 +49,10 @@ func CreatePost(c *fiber.Ctx) error {
 	}
 	createdPost, err := postsColl.InsertOne(context.TODO(), doc)
 	if err != nil {
-		return utils.ReturnError(c, fiber.StatusInternalServerError, err.Error(), nil)
+		return utils.InternalServerErrorResponse(c, err)
 	}
 
-	return utils.ReturnSuccess(c, fiber.StatusCreated, "Post created", fiber.Map{
+	return utils.CreatedResponse(c, "Post created", fiber.Map{
 		"postId": createdPost.InsertedID,
 	})
 }
