@@ -71,3 +71,16 @@ func InternalServerErrorResponse(c *fiber.Ctx, err error) error {
 	log.Println(err)
 	return CustomResponse(c, fiber.StatusInternalServerError, StatusError, err.Error(), nil)
 }
+
+func BadRequestErrorResponse(c *fiber.Ctx, err error, data fiber.Map) error {
+	log.Println(err)
+	return CustomResponse(c, fiber.StatusBadRequest, StatusError, err.Error(), data)
+}
+
+func OkResponse(c *fiber.Ctx, message string, data fiber.Map) error {
+	return CustomResponse(c, fiber.StatusOK, StatusSuccess, message, data)
+}
+
+func CreatedResponse(c *fiber.Ctx, message string, data fiber.Map) error {
+	return CustomResponse(c, fiber.StatusCreated, StatusSuccess, message, data)
+}
