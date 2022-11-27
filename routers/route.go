@@ -3,6 +3,7 @@ package routers
 import (
 	"mongogram/handlers/accounts"
 	"mongogram/handlers/auth"
+	"mongogram/handlers/media"
 	"mongogram/handlers/post"
 	"mongogram/handlers/search"
 	"mongogram/handlers/user"
@@ -45,5 +46,10 @@ func SetupRoute(app *fiber.App) {
 	postRoute.Post("/", middlewares.Protected(), post.CreatePost)
 	postRoute.Get("/", post.GetPosts)
 	postRoute.Get("/:postId", post.GetPost)
+
+	// media
+
+	mediaRoute := app.Group("/media")
+	mediaRoute.Post("/upload", media.Upload)
 
 }
