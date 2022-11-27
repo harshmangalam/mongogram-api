@@ -6,6 +6,7 @@ import (
 	"mongogram/config"
 
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/gridfs"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -22,9 +23,16 @@ func ConnectMongo() error {
 
 	db := client.Database(dbName)
 
+	gridFsOpts := options.GridFSBucket().SetName("media")
+	bucket, err := gridfs.NewBucket(db, gridFsOpts)
+	if err != nil {
+		return err
+	}
+
 	Mi = MongoInstance{
 		Client: client,
 		Db:     db,
+		Bucket: bucket,
 	}
 
 	log.Printf("Mongodb connected (%v)", dbName)
