@@ -1,12 +1,9 @@
 package user
 
 import (
-	"context"
-	"mongogram/database"
-	"mongogram/models"
+	"mongogram/utils"
 
 	"github.com/gofiber/fiber/v2"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -14,48 +11,14 @@ func GetUser(c *fiber.Ctx) error {
 
 	userId, _ := primitive.ObjectIDFromHex(c.Params("userId"))
 
-	usersColl := database.Mi.Db.Collection(database.UsersCollection)
-
-	user := new(models.User)
-	filter := bson.D{{Key: "_id", Value: userId}}
-
-	if err := usersColl.FindOne(context.TODO(), filter).Decode(user); err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"status":  "error",
-			"message": "User not found",
-			"data":    nil,
-		})
+	user, err := utils.FindUserById(userId)
+	if user == nil && err == nil {
+		return utils.NotFoundErrorResponse(c)
 	}
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"status":  "success",
-		"message": "Get user",
-		"data": fiber.Map{
-			"user": user,
-		},
-	})
-}
-
-func GetMe(c *fiber.Ctx) error {
-
-	userId := c.Locals("userId")
-
-	usersColl := database.Mi.Db.Collection(database.UsersCollection)
-
-	user := new(models.User)
-	filter := bson.D{{Key: "_id", Value: userId}}
-
-	if err := usersColl.FindOne(context.TODO(), filter).Decode(user); err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"status":  "error",
-			"message": "User not found",
-			"data":    nil,
-		})
+	if err != nil {
+		return utils.InternalServerErrorResponse(c, err)
 	}
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"status":  "success",
-		"message": "get current user",
-		"data": fiber.Map{
-			"user": user,
-		},
+	return utils.OkResponse(c, "Get user details", fiber.Map{
+		"user": user,
 	})
 }
