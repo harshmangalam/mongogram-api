@@ -26,7 +26,7 @@ func FindUserById(userId any) (*models.User, error) {
 
 	usersColl := database.Mi.Db.Collection(database.UsersCollection)
 
-	if err := usersColl.FindOne(context.TODO(), bson.D{{"_id", userId}}).Decode(user); err != nil {
+	if err := usersColl.FindOne(context.TODO(), bson.M{"_id": userId}).Decode(user); err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, nil
 		} else {

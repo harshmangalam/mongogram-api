@@ -14,7 +14,7 @@ func FindPostById(postId any) (*models.Post, error) {
 
 	postsColl := database.Mi.Db.Collection(database.PostsCollection)
 
-	if err := postsColl.FindOne(context.TODO(), bson.D{{"_id", postId}}).Decode(post); err != nil {
+	if err := postsColl.FindOne(context.TODO(), bson.M{"_id": postId}).Decode(post); err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, nil
 		} else {
