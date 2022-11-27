@@ -2,7 +2,7 @@ package utils
 
 import "github.com/gofiber/fiber/v2"
 
-func ReturnError(c *fiber.Ctx, status int, message string, data any) error {
+func ErrorResponse(c *fiber.Ctx, status int, message string, data any) error {
 	return c.Status(status).JSON(fiber.Map{
 		"status":  "error",
 		"message": message,
@@ -10,7 +10,7 @@ func ReturnError(c *fiber.Ctx, status int, message string, data any) error {
 	})
 }
 
-func ReturnSuccess(c *fiber.Ctx, status int, message string, data any) error {
+func SuccessResponse(c *fiber.Ctx, status int, message string, data any) error {
 	return c.Status(status).JSON(fiber.Map{
 		"status":  "success",
 		"message": message,
