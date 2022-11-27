@@ -11,22 +11,18 @@ func GetPost(c *fiber.Ctx) error {
 	postId, err := primitive.ObjectIDFromHex(c.Params("postId"))
 
 	if err != nil {
-		return utils.ReturnError(c, fiber.StatusBadRequest, err.Error(), nil)
+		return utils.BadRequestErrorResponse(c, "Invalid post id")
 	}
 
 	post, err := utils.FindPostById(postId)
 	if err == nil && post == nil {
-		return utils.ReturnError(c, fiber.StatusNotFound, "Post not found", nil)
+		return utils.NotFoundErrorResponse(c)
 	}
 	if err != nil {
-		return utils.ReturnError(c, fiber.StatusInternalServerError, err.Error(), nil)
+		return utils.InternalServerErrorResponse(c, err)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"status":  "success",
-		"message": "et post",
-		"data": fiber.Map{
-			"post": post,
-		},
+	return utils.OkResponse(c, "Get post details", fiber.Map{
+		"post": post,
 	})
 }
