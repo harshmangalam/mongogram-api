@@ -2,12 +2,20 @@ package utils
 
 import (
 	"context"
+	"math"
 	"mongogram/database"
 	"mongogram/models"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
+
+type Birthday struct {
+	Day   int `json:"day" validate:"required"`
+	Month int `json:"month" validate:"required"`
+	Year  int `json:"year" validate:"required"`
+}
 
 func DuplicateUserField(coll *mongo.Collection, field string, value any) (bool, error) {
 	data := bson.D{}
@@ -63,4 +71,12 @@ func UpdateUser(id any, update bson.M) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+func GetAge(birthday *Birthday) float64 {
+	birthTime := time.Date(birthday.Year, time.Month(birthday.Month), birthday.Day, 0, 0, 0, 0, time.UTC)
+	// calculate user age
+	const SecondsInYear = 3.156e+7
+	return math.Round(time.Since(birthTime).Seconds() / SecondsInYear)
+
 }
