@@ -8,17 +8,18 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type CreatePostBody struct {
-	MediaType string `json:"mediaType" validate:"required"`
-	MediaUrl  string `json:"mediaUrl" validate:"required"`
-	Content   string `json:"content"`
+	MediaId string `json:"mediaId" validate:"required"`
+	Content string `json:"content"`
 }
 
 func CreatePost(c *fiber.Ctx) error {
 	body := new(CreatePostBody)
 	userId := c.Locals("userId")
+
 	// parse request body
 	if err := c.BodyParser(body); err != nil {
 		return utils.ReturnError(c, fiber.StatusInternalServerError, err.Error(), nil)
@@ -34,22 +35,24 @@ func CreatePost(c *fiber.Ctx) error {
 
 	postsColl := database.Mi.Db.Collection(database.PostsCollection)
 
+	mediaId, err := primitive.ObjectIDFromHex(body.MediaId)
+	if err != nil {
+		return utils.ReturnError(c, fiber.StatusBadRequest, "Invalid media id", nil)
+	}
+
 	doc := bson.M{
-		"mediaType": body.MediaType,
-		"mediaUrl":  body.MediaUrl,
+		"mediaId":   mediaId,
 		"content":   body.Content,
 		"authorId":  userId,
 		"createdAt": time.Now().UTC(),
 		"updatedAt": time.Now().UTC(),
 	}
-	_, err := postsColl.InsertOne(context.TODO(), doc)
+	createdPost, err := postsColl.InsertOne(context.TODO(), doc)
 	if err != nil {
 		return utils.ReturnError(c, fiber.StatusInternalServerError, err.Error(), nil)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"status":  "success",
-		"message": "Post created",
-		"data":    nil,
+	return utils.ReturnSuccess(c, fiber.StatusCreated, "Post created", fiber.Map{
+		"postId": createdPost.InsertedID,
 	})
 }
