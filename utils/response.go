@@ -1,12 +1,16 @@
 package utils
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"log"
+
+	"github.com/gofiber/fiber/v2"
+)
 
 type StatusText string
 
 const (
-	Success StatusText = "success"
-	Error   StatusText = "error"
+	StatusSuccess StatusText = "success"
+	StatusError   StatusText = "error"
 )
 
 type ResponseSchema struct {
@@ -52,11 +56,18 @@ func (r *ResponseSchema) Return() error {
 	})
 }
 
-func CustomResponse(r *ResponseSchema) error {
-	return NewResponseSchema().Set
+func CustomResponse(c *fiber.Ctx, statusCode int, statusText StatusText, message string, data fiber.Map) error {
+	return NewResponseSchema().
+		SetCtx(c).
+		SetStatusCode(statusCode).
+		SetStatusText(statusText).
+		SetMessage(message).
+		SetData(data).
+		Return()
 
 }
 
-func InternalServerErrorResponse(c *fiber.Ctx, err error) {
-	return CustomResponse(c, Error, fiber.StatusInternalServerError, "", nil)
+func InternalServerErrorResponse(c *fiber.Ctx, err error) error {
+	log.Println(err)
+	return CustomResponse(c, fiber.StatusInternalServerError, StatusError, err.Error(), nil)
 }
