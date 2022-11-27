@@ -23,13 +23,13 @@ func Login(c *fiber.Ctx) error {
 	loginBody := new(LoginBody)
 
 	if err := c.BodyParser(loginBody); err != nil {
-		return utils.ReturnError(c, fiber.StatusInternalServerError, err.Error(), nil)
+		return utils.InternalServerErrorResponse(c, err)
 	}
 
 	// validate users input
 	errors := utils.ValidateStruct(loginBody)
 	if errors != nil {
-		return utils.ReturnError(c, fiber.StatusBadRequest, "Invalid input", errors)
+		return utils.UnprocessedInputResponse(c, fiber.Map{"errors": errors})
 
 	}
 
@@ -37,7 +37,6 @@ func Login(c *fiber.Ctx) error {
 	usersColl := database.Mi.Db.Collection(database.UsersCollection)
 
 	// verify user email/username/phone
-
 	filter := bson.D{
 		{Key: "$or", Value: bson.A{
 			bson.D{{Key: "email", Value: loginBody.Username}},
@@ -48,52 +47,44 @@ func Login(c *fiber.Ctx) error {
 	}
 	if err := usersColl.FindOne(context.TODO(), filter).Decode(user); err != nil {
 		if err == mongo.ErrNoDocuments {
-			return utils.ReturnError(c, fiber.StatusBadRequest, "Incorrect credentials", nil)
+			return utils.BadRequestErrorResponse(c, "Incorrect credentials")
 		} else {
-			return utils.ReturnError(c, fiber.StatusInternalServerError, err.Error(), nil)
+			return utils.InternalServerErrorResponse(c, err)
 		}
 	}
 
 	// match  password hash
-
 	if match := utils.CheckPasswordHash(loginBody.Password, user.Password); !match {
-		return utils.ReturnError(c, fiber.StatusBadRequest, "Incorrect credentials", nil)
+		return utils.BadRequestErrorResponse(c, "Incorrect credentials")
 
 	}
 
 	// update user active status
 
-	filterUser := bson.D{{Key: "_id", Value: user.Id}}
-	updateUser := bson.D{{Key: "$set", Value: bson.D{{Key: "isActive", Value: true}}}}
-	_, err := usersColl.UpdateOne(context.TODO(), filterUser, updateUser)
+	updateDoc := bson.M{
+		"$set": bson.M{
+			"isActive": true,
+		},
+	}
+	_, err := utils.UpdateUser(user.Id, updateDoc)
 	if err != nil {
-		return utils.ReturnError(c, fiber.StatusInternalServerError, err.Error(), nil)
+		return utils.InternalServerErrorResponse(c, err)
 
 	}
 
-	// fetch updated user
-
-	if err := usersColl.FindOne(context.TODO(), filter).Decode(user); err != nil {
-		return utils.ReturnError(c, fiber.StatusInternalServerError, err.Error(), nil)
-
-	}
 	// create jwt token
-
 	token := jwt.New(jwt.SigningMethodHS256)
-
 	claims := token.Claims.(jwt.MapClaims)
 	claims["userId"] = user.Id
 	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 
 	t, err := token.SignedString([]byte("SECRET"))
 	if err != nil {
-		return c.SendStatus(fiber.StatusInternalServerError)
+		return utils.InternalServerErrorResponse(c, err)
 	}
 
-	data := fiber.Map{
-		"user":       user,
+	return utils.OkResponse(c, "Login successfully", fiber.Map{
 		"accesToken": t,
-	}
-	return utils.ReturnSuccess(c, fiber.StatusOK, "Login successfully", data)
+	})
 
 }
