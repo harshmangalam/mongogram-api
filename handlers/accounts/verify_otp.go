@@ -13,16 +13,16 @@ type VerifiOtpBody struct {
 
 func VerifyOtp(c *fiber.Ctx) error {
 	body := new(VerifiOtpBody)
+
 	// parse request body
 	if err := c.BodyParser(body); err != nil {
-		return utils.ReturnError(c, fiber.StatusInternalServerError, err.Error(), nil)
+		return utils.InternalServerErrorResponse(c, err)
 	}
 
 	// validate input body
-
 	errors := utils.ValidateStruct(body)
 	if errors != nil {
-		return utils.ReturnError(c, fiber.StatusBadRequest, "Invalid input", errors)
+		return utils.UnprocessedInputResponse(c, fiber.Map{"errors": errors})
 
 	}
 
@@ -30,20 +30,16 @@ func VerifyOtp(c *fiber.Ctx) error {
 	user, err := utils.FindUser("email", body.Email)
 
 	if err == nil && user == nil {
-		return utils.ReturnError(c, fiber.StatusNotFound, "User not found", nil)
+		return utils.NotFoundErrorResponse(c)
 	}
 	if err != nil {
-		return utils.ReturnError(c, fiber.StatusInternalServerError, err.Error(), nil)
+		return utils.InternalServerErrorResponse(c, err)
 	}
 
 	if user.ResetPassOtp != body.Otp {
-		return utils.ReturnError(c, fiber.StatusBadRequest, "Incorrect otp", nil)
+		return utils.BadRequestErrorResponse(c, "Incorrect otp")
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"status":  "success",
-		"message": "Otp verified",
-		"data":    nil,
-	})
+	return utils.OkResponse(c, "Otp verified", nil)
 
 }
