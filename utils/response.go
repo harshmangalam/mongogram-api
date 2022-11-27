@@ -72,9 +72,13 @@ func InternalServerErrorResponse(c *fiber.Ctx, err error) error {
 	return CustomResponse(c, fiber.StatusInternalServerError, StatusError, err.Error(), nil)
 }
 
-func BadRequestErrorResponse(c *fiber.Ctx, err error, data fiber.Map) error {
-	log.Println(err)
-	return CustomResponse(c, fiber.StatusBadRequest, StatusError, err.Error(), data)
+func BadRequestErrorResponse(c *fiber.Ctx, message string) error {
+
+	return CustomResponse(c, fiber.StatusBadRequest, StatusError, message, nil)
+}
+
+func UnprocessedInputResponse(c *fiber.Ctx, data fiber.Map) error {
+	return CustomResponse(c, fiber.StatusUnprocessableEntity, StatusError, "Invalid input", data)
 }
 
 func NotFoundErrorResponse(c *fiber.Ctx) error {
