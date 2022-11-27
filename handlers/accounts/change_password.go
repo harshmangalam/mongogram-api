@@ -21,56 +21,40 @@ func ChangePassword(c *fiber.Ctx) error {
 
 	// parse request body
 	if err := c.BodyParser(changePassword); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"type":    "error",
-			"message": err.Error(),
-			"data":    nil,
-		})
+		return utils.InternalServerErrorResponse(c, err)
+
+	}
+
+	// validate user input
+	error := utils.ValidateStruct(changePassword)
+
+	if error != nil {
+		return utils.UnprocessedInputResponse(c, fiber.Map{"errors": error})
 	}
 
 	user, err := utils.FindUserById(userId)
 
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"type":    "error",
-			"message": err.Error(),
-			"data":    nil,
-		})
+	if err == nil && user == nil {
+		return utils.NotFoundErrorResponse(c)
 	}
-
-	if user == nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"type":    "error",
-			"message": "User not found",
-			"data":    nil,
-		})
+	if err != nil {
+		return utils.InternalServerErrorResponse(c, err)
 	}
 
 	// match current password
-
 	if match := utils.CheckPasswordHash(changePassword.CurrentPassword, user.Password); !match {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"type":    "error",
-			"message": "Current password is incorrect",
-			"data":    nil,
-		})
+		return utils.BadRequestErrorResponse(c, "Current password is incorrect")
 	}
 
 	// hash new passord
-
 	hash, err := utils.HashPassword(changePassword.NewPassword)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"type":    "error",
-			"message": err.Error(),
-			"data":    nil,
-		})
+		return utils.InternalServerErrorResponse(c, err)
 
 	}
 
 	// save new password
-
 	usersColl := database.Mi.Db.Collection(database.UsersCollection)
 	update := bson.D{
 		{"$set", bson.D{
@@ -80,16 +64,8 @@ func ChangePassword(c *fiber.Ctx) error {
 	}
 	_, err = usersColl.UpdateByID(context.TODO(), userId, update)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"type":    "error",
-			"message": err.Error(),
-			"data":    nil,
-		})
+		return utils.InternalServerErrorResponse(c, err)
 	}
 
-	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-		"type":    "success",
-		"message": "Password changed",
-		"data":    nil,
-	})
+	return utils.OkResponse(c, "Password changed", nil)
 }
