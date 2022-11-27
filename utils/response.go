@@ -39,12 +39,16 @@ func (r *ResponseSchema) SetData(data fiber.Map) *ResponseSchema {
 	return r
 }
 
-func CustomResponse(c *fiber.Ctx, statusText StatusText, statusCode int, message string, data any) error {
-	return c.Status(statusCode).JSON(fiber.Map{
-		"status":  statusText,
-		"message": message,
-		"data":    data,
+func (r *ResponseSchema) Return() error {
+	return r.Ctx.Status(r.StatusCode).JSON(fiber.Map{
+		"status":  r.StatusText,
+		"message": r.Message,
+		"data":    r.Data,
 	})
+}
+
+func CustomResponse(r *ResponseSchema) error {
+	return NewResponseSchema()
 }
 
 func InternalServerErrorResponse(c *fiber.Ctx, err error) {
