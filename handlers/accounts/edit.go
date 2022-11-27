@@ -1,9 +1,6 @@
 package accounts
 
 import (
-	"context"
-	"mongogram/database"
-	"mongogram/models"
 	"mongogram/utils"
 
 	"github.com/gofiber/fiber/v2"
@@ -24,54 +21,30 @@ func EditAccount(c *fiber.Ctx) error {
 
 	// parse request body
 	if err := c.BodyParser(editAccBody); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"type":    "error",
-			"message": err.Error(),
-			"data":    nil,
-		})
+		return utils.InternalServerErrorResponse(c, err)
 	}
 
 	// validate input body
-
 	errors := utils.ValidateStruct(editAccBody)
 	if errors != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"status":  "error",
-			"message": "Invalid input",
-			"data": fiber.Map{
-				"errors": errors,
-			},
-		})
+		return utils.UnprocessedInputResponse(c, fiber.Map{"errors": errors})
 
 	}
-
-	usersColl := database.Mi.Db.Collection(database.UsersCollection)
 
 	// update account
-
-	updateDoc := bson.D{
-		{"$set", bson.D{
-			{"email", editAccBody.Email},
-			{"name", editAccBody.Name},
-			{"phone", editAccBody.Phone},
-			{"username", editAccBody.Username},
-			{"bio", editAccBody.Bio},
-		},
+	updateDoc := bson.M{
+		"$set": bson.M{
+			"email":    editAccBody.Email,
+			"name":     editAccBody.Name,
+			"phone":    editAccBody.Phone,
+			"username": editAccBody.Username,
+			"bio":      editAccBody.Bio,
 		},
 	}
-	user := new(models.User)
-	if err := usersColl.FindOneAndUpdate(context.TODO(), bson.D{{"_id", userId}}, updateDoc).Decode(user); err != nil {
-
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"status":  "error",
-			"message": err.Error(),
-			"data":    nil,
-		})
+	_, err := utils.UpdateUser(userId, updateDoc)
+	if err != nil {
+		return utils.InternalServerErrorResponse(c, err)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"status":  "success",
-		"message": "Account edited",
-		"data":    nil,
-	})
+	return utils.OkResponse(c, "Account updated", nil)
 }
