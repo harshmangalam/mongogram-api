@@ -3,6 +3,7 @@ package media
 import (
 	"context"
 	"mongogram/database"
+	"mongogram/models"
 	"mongogram/utils"
 
 	"github.com/gofiber/fiber/v2"
@@ -20,7 +21,7 @@ func GetMedia(c *fiber.Ctx) error {
 		return utils.InternalServerErrorResponse(c, err)
 	}
 
-	mediaList := []bson.M{}
+	var mediaList []models.Media
 	if err = cursor.All(context.TODO(), &mediaList); err != nil {
 		return utils.InternalServerErrorResponse(c, err)
 	}
