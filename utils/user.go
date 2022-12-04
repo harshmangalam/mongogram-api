@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type Birthday struct {
+type DateBody struct {
 	Day   int `json:"day" validate:"required"`
 	Month int `json:"month" validate:"required"`
 	Year  int `json:"year" validate:"required"`
@@ -73,10 +73,14 @@ func UpdateUser(id any, update bson.M) (bool, error) {
 	return true, nil
 }
 
-func GetAge(birthday *Birthday) (float64, *time.Time) {
-	birthTime := time.Date(birthday.Year, time.Month(birthday.Month), birthday.Day, 0, 0, 0, 0, time.UTC)
+func GetAge(date *DateBody) (float64, *time.Time) {
+	t := GetDate(date)
 	// calculate user age
 	const SecondsInYear = 3.156e+7
-	return math.Round(time.Since(birthTime).Seconds() / SecondsInYear), &birthTime
+	return math.Round(time.Since(t).Seconds() / SecondsInYear), &t
 
+}
+
+func GetDate(date *DateBody) time.Time {
+	return time.Date(date.Year, time.Month(date.Month), date.Day, 0, 0, 0, 0, time.UTC)
 }
