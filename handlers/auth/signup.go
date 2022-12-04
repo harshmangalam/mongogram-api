@@ -18,7 +18,7 @@ type SignupBody struct {
 	Name     string          `json:"name" validate:"required"`
 	Username string          `json:"username" validate:"required"`
 	Password string          `json:"password" validate:"required"`
-	Birthday *utils.Birthday `json:"birthday" validate:"required"`
+	Birthday *utils.DateBody `json:"birthday" validate:"required"`
 }
 
 func Signup(c *fiber.Ctx) error {

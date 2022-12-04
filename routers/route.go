@@ -39,6 +39,7 @@ func SetupRoute(app *fiber.App) {
 	accountRoute.Patch("/change_password", middlewares.Protected(), accounts.ChangePassword)
 	accountRoute.Post("/reset_password", accounts.ResetPassword)
 	accountRoute.Post("/deactivate_permanent", middlewares.Protected(), accounts.DeactivateAccountPermanent)
+	accountRoute.Post("/deactivate_temporary", middlewares.Protected(), accounts.DeactivateAccountTemporary)
 
 	//posts
 	postRoute := app.Group("/post")
