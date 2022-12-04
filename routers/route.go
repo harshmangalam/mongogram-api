@@ -19,7 +19,6 @@ func SetupRoute(app *fiber.App) {
 	authRoute := app.Group("/auth")
 	authRoute.Post("/signup", auth.Signup)
 	authRoute.Post("/login", auth.Login)
-	authRoute.Post("/login-with-github", auth.LoginWithGithub)
 
 	// user route
 	userRoute := app.Group("/user")
@@ -39,9 +38,10 @@ func SetupRoute(app *fiber.App) {
 	accountRoute.Put("/edit", middlewares.Protected(), accounts.EditAccount)
 	accountRoute.Patch("/change_password", middlewares.Protected(), accounts.ChangePassword)
 	accountRoute.Post("/reset_password", accounts.ResetPassword)
+	accountRoute.Post("/deactivate_permanent", middlewares.Protected(), accounts.DeactivateAccountPermanent)
 
 	//posts
-	postRoute := app.Group("/posts")
+	postRoute := app.Group("/post")
 	postRoute.Post("/", middlewares.Protected(), post.CreatePost)
 	postRoute.Get("/", post.GetPosts)
 	postRoute.Get("/:postId", post.GetPost)
